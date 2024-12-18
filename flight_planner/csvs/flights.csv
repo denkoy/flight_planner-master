@@ -1,0 +1,6 @@
+flight_id,flight_number,origin_airport_id,destination_airport_id,price, departure_time, arrival_time, travel_time
+1,AA100,1,2,,,,
+2,DL200,2,3,,,,
+3,UA300,3,4,,,,
+4,SW400,4,5,,,,
+5,WN500,5,1,,,,
