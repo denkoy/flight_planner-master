@@ -30,49 +30,6 @@ If `DATA_STORE` is not set, or `inmemory`, use the In Memory store. If it is equ
 
 **NOTE**: Your data stores should have only optional arguments, thus allowing instantiation without any arguments.
 
-## Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/Abiesio/flight-planner.git
-   cd flight-planner
-   ```
-
-2. Create a virtual environment and activate it:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   ```
-
-3. Install the dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. Run the application:
-
-   ```bash
-   python -m flight_planner.app
-   ```
-
-## Docker
-
-To run the application in a Docker container:
-
-1. Build the Docker image:
-
-   ```bash
-   docker build -t flight-planner .
-   ```
-
-2. Run the Docker container:
-
-   ```bash
-   docker run -p 5000:5000 flight-planner
-   ```
 
 ## API Endpoints
 
