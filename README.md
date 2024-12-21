@@ -8,29 +8,6 @@ A simple flight planning application with RESTful API endpoints for managing cit
 - Supports data persistence in files or an SQL database.
 - RESTful API with endpoints for CRUD operations.
 
-## Requirements for student implementation:
-* You are allowed to edit all files, except `flight_planner/app.py`, and to a much lesser degree - `flight_planner/app.py`.
-
-Make sure to preserve the API and most of `flight_planner/routes.py` - edit to fit your own services implementation.
-
-*Note*: The `test_services.py` file provides basic logic tests for your services implementation. Your code should pass these tests if it is valid.
-
-`Dockerfile` and `setup.py` are provided optionally.
-
-Basic points: 15pts (For correct implementation of the base task)
-
-### Bonus points:
-* For importing data from a CSV file (no export) (+1 pt)
-* For file-based storage (both loading and saving) (+2 pt)
-* For SQL-based storage (both loading and saving) (+2 pt)
-* For correct and passing unit tests (test_services.py) (+1 pt)
-
-**NOTE**: In case you're providing multiple storage mechanisms, your services layer should select the appropriate data store (In memory / File-based / SQL-based) based on the value of the `DATA_STORE` environment variable.
-If `DATA_STORE` is not set, or `inmemory`, use the In Memory store. If it is equal to `file`, use the File-based store. If it is equal to `sql`, use the SQL-based store.
-
-**NOTE**: Your data stores should have only optional arguments, thus allowing instantiation without any arguments.
-
-
 ## API Endpoints
 
 ### City Endpoints
@@ -43,6 +20,7 @@ If `DATA_STORE` is not set, or `inmemory`, use the In Memory store. If it is equ
 ### Airport Endpoints
 - `POST /airports/` - Create a new airport
 - `PUT /airports/` - Edit the whole collection of airports
+- `PUT /airports/<id>` - Edit airport by ID
 - `DELETE /airports/` - Delete all airports
 - `GET /airports/` - Get a collection of airports
 - `GET /airports/<id>` - Get an airport by ID
@@ -85,10 +63,8 @@ If `DATA_STORE` is not set, or `inmemory`, use the In Memory store. If it is equ
 - `PUT /flights/<id>` - Edit a flight by ID
 - `DELETE /flights/<id>` - Delete a flight by ID
 
-### Explanation:
-
-- **Directory Structure**: The project is organized into a package named `flight_planner` with submodules for different components like models, routes, services, and persistence.
-
-- **Persistence Options**: Two persistence options are provided: `FileStorage` for file-based storage and `SQLStorage` for SQLite database storage.
-
-- **Virtual Environment**: The `requirements.txt` file lists the dependencies needed for the project.
+### Additional Features
+- `SQL Storage` - All of the data used by the API is stored in SQL database. SQLite3 is used for easier management.
+- `Flask` - Flask is used for the managing of the API service.
+- `CSV service` - There is functionality which allows you to import data from a CSV file(ObjectService.initialize_database) method.
+- `Tests` - I wrote around 60 tests which test all the functionalities of my project.
