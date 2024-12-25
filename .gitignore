@@ -114,3 +114,4 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+/flight_planner/secrets.py

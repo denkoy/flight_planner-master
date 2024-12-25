@@ -4,10 +4,12 @@ from flight_planner.app import create_app
 import unittest
 from unittest.mock import patch, MagicMock
 from flight_planner.services import CityService, AirportService, FlightService, ObjectService
-
+from flight_planner.secrets import ADMIN_TOKEN
+from flight_planner.api_object import ApiObject
 
 # FILE: flight_planner/test_services.py
 
+header={"Authorization": f"Bearer {ADMIN_TOKEN}"}
 
 class SmartTestCaseFromAbies(unittest.TestCase):
     def assertIncludes(self, actual, expected):
@@ -26,19 +28,22 @@ class TestCityServiceFromAbies(SmartTestCaseFromAbies):
     def test_1_create_city(self, mock_storage):
         mock_storage.create_city.return_value = {"id": 1, "name": "Test City"}
         response = CityService.create_city({"name": "Test City"})
-        self.assertIncludes(response, {"id": 1, "name": "Test City"})
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test City"})
 
     @patch("flight_planner.services.storage")
     def test_2_get_all_cities(self, mock_storage):
         mock_storage.get_all_cities.return_value = [{"id": 1, "name": "Test City"}]
         response = CityService.get_all_cities()
-        self.assertPiecewiseIncludes(response, [{"id": 1, "name": "Test City"}])
+        response_data = []
+        for i in response:
+            response_data.append(i.generate_dict())
+        self.assertPiecewiseIncludes(response_data, [{"id": 1, "name": "Test City"}])
 
     @patch("flight_planner.services.storage")
     def test_3_get_city(self, mock_storage):
         mock_storage.get_city.return_value = {"id": 1, "name": "Test City"}
         response = CityService.get_city(1)
-        self.assertIncludes(response, {"id": 1, "name": "Test City"})
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test City"})
 
     @patch("flight_planner.services.storage")
     def test_6_get_city_not_found(self, mock_storage):
@@ -60,21 +65,25 @@ class TestCityServiceFromAbies(SmartTestCaseFromAbies):
 class TestAirportServiceFromAbies(SmartTestCaseFromAbies):
     @patch("flight_planner.services.storage")
     def test_1_create_airport(self, mock_storage):
+        tear_down_module()
         mock_storage.create_airport.return_value = {"id": 1, "name": "Test Airport"}
         response = AirportService.create_airport({"name": "Test Airport"})
-        self.assertIncludes(response, {"id": 1, "name": "Test Airport"})
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test Airport"})
 
     @patch("flight_planner.services.storage")
     def test_2_get_all_airports(self, mock_storage):
         mock_storage.get_all_airports.return_value = [{"id": 1, "name": "Test Airport"}]
         response = AirportService.get_all_airports()
-        self.assertPiecewiseIncludes(response, [{"id": 1, "name": "Test Airport"}])
+        response_data = []
+        for i in response:
+            response_data.append(i.generate_dict())
+        self.assertPiecewiseIncludes(response_data, [{"id": 1, "name": "Test Airport"}])
 
     @patch("flight_planner.services.storage")
     def test_3_get_airport(self, mock_storage):
         mock_storage.get_airport.return_value = {"id": 1, "name": "Test Airport"}
         response = AirportService.get_airport(1)
-        self.assertIncludes(response, {"id": 1, "name": "Test Airport"})
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test Airport"})
 
     @patch("flight_planner.services.storage")
     def test_6_get_airport_not_found(self, mock_storage):
@@ -97,20 +106,22 @@ class TestFlightServiceFromAbies(SmartTestCaseFromAbies):
     @patch("flight_planner.services.storage")
     def test_1_create_flight(self, mock_storage):
         mock_storage.create_flight.return_value = {"id": 1, "name": "Test Flight"}
-        response = FlightService.create_flight({"name": "Test Flight"})
-        self.assertIncludes(response, {"id": 1, "name": "Test Flight"})
+        dict={"name": "Test Flight"}
+        response = FlightService.create_flight(dict)
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test Flight"})
 
     @patch("flight_planner.services.storage")
     def test_2_get_all_flights(self, mock_storage):
         mock_storage.get_all_flights.return_value = [{"id": 1, "name": "Test Flight"}]
         response = FlightService.get_all_flights()
-        self.assertPiecewiseIncludes(response, [{"id": 1, "name": "Test Flight"}])
+        response_list = [object.generate_dict() for object in response]
+        self.assertPiecewiseIncludes(response_list, [{"id": 1, "name": "Test Flight"}])
 
     @patch("flight_planner.services.storage")
     def test_3_get_flight(self, mock_storage):
         mock_storage.get_flight.return_value = {"id": 1, "name": "Test Flight"}
         response = FlightService.get_flight(1)
-        self.assertIncludes(response, {"id": 1, "name": "Test Flight"})
+        self.assertIncludes(response.generate_dict(), {"id": 1, "name": "Test Flight"})
 
     @patch("flight_planner.services.storage")
     def test_6_get_flight_not_found(self, mock_storage):
@@ -129,30 +140,34 @@ class TestFlightServiceFromAbies(SmartTestCaseFromAbies):
         self.assertEqual(response, "")
 
 
-#########################################
-
-
-# My tests
-
-
+# #########################################
+#
+#
+# # My tests
+#
+#
 class TestCityService(unittest.TestCase):
     @patch("flight_planner.services.storage")
     def test_a_create_city(self, mock_storage):
+        tear_down_module()
         mock_storage.create_city.return_value = {"id": 1, "name": "Test City"}
         response = CityService.create_city({"name": "Test City"})
-        self.assertEqual(response, {"id": 1, "name": "Test City"})
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test City"})
 
     @patch("flight_planner.services.storage")
     def test_b_get_all_cities(self, mock_storage):
         mock_storage.get_all_cities.return_value = [{"id": 1, "name": "Test City"}]
         response = CityService.get_all_cities()
-        self.assertEqual(response, [{"id": 1, "name": "Test City"}])
+        response_data = []
+        for i in response:
+            response_data.append(i.generate_dict())
+        self.assertEqual(response_data, [{"id": 1, "name": "Test City"}])
 
     @patch("flight_planner.services.storage")
     def test_c_get_city(self, mock_storage):
         mock_storage.get_city.return_value = {"id": 1, "name": "Test City"}
         response = CityService.get_city(1)
-        self.assertEqual(response, {"id": 1, "name": "Test City"})
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test City"})
 
     @patch("flight_planner.services.storage")
     def test_g_get_city_not_found(self, mock_storage):
@@ -178,19 +193,22 @@ class TestAirportService(unittest.TestCase):
         mock_storage.create_airport.return_value = {"id": 1, "name": "Test Airport"}
         CityService.create_city({"name": "Sofia de Janeiro"})
         response = AirportService.create_airport({"name": "Test Airport", "city_id": 1})
-        self.assertEqual(response, {"id": 1, "name": "Test Airport", "city_id": 1})
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test Airport", "city_id": 1})
 
     @patch("flight_planner.services.storage")
     def test_b_get_all_airports(self, mock_storage):
         mock_storage.get_all_airports.return_value = [{"id": 1, "name": "Test Airport"}]
         response = AirportService.get_all_airports()
-        self.assertEqual(response, [{"id": 1, "name": "Test Airport", "city_id": 1}])
+        response_data=[]
+        for i in response:
+            response_data.append(i.generate_dict())
+        self.assertEqual(response_data, [{"id": 1, "name": "Test Airport", "city_id": 1}])
 
     @patch("flight_planner.services.storage")
     def test_c_get_airport(self, mock_storage):
         mock_storage.get_airport.return_value = {"id": 1, "name": "Test Airport"}
         response = AirportService.get_airport(1)
-        self.assertEqual(response, {"id": 1, "name": "Test Airport", "city_id": 1})
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test Airport", "city_id": 1})
 
     @patch("flight_planner.services.storage")
     def test_g_get_airport_not_found(self, mock_storage):
@@ -214,20 +232,22 @@ class TestFlightService(unittest.TestCase):
     @patch("flight_planner.services.storage")
     def test_a_create_flight(self, mock_storage):
         mock_storage.create_flight.return_value = {"id": 1, "name": "Test Flight"}
-        response = FlightService.create_flight({"name": "Test Flight"})
-        self.assertEqual(response, {"id": 1, "name": "Test Flight"})
+        dict={"name": "Test Flight"}
+        response = FlightService.create_flight(dict)
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test Flight"})
 
     @patch("flight_planner.services.storage")
     def test_b_get_all_flights(self, mock_storage):
         mock_storage.get_all_flights.return_value = [{"id": 1, "name": "Test Flight"}]
         response = FlightService.get_all_flights()
-        self.assertEqual(response, [{"id": 1, "name": "Test Flight"}])
+        response_list=[object.generate_dict() for object in response]
+        self.assertEqual(response_list, [{"id": 1, "name": "Test Flight"}])
 
     @patch("flight_planner.services.storage")
     def test_c_get_flight(self, mock_storage):
         mock_storage.get_flight.return_value = {"id": 1, "name": "Test Flight"}
         response = FlightService.get_flight(1)
-        self.assertEqual(response, {"id": 1, "name": "Test Flight"})
+        self.assertEqual(response.generate_dict(), {"id": 1, "name": "Test Flight"})
 
     @patch("flight_planner.services.storage")
     def test_g_get_flight_not_found(self, mock_storage):
@@ -255,7 +275,7 @@ class TestCityServiceAPI(unittest.TestCase):
         cls.client = app.test_client()
 
     def test_1_get_all_cities(self):
-        response = self.client.get("/cities/")
+        response = self.client.get("/cities/",headers=header)
         self.assertEqual(response.status_code, 200)  # Check if status code is 200
         data = json.loads(response.data)
         self.assertIsInstance(data, list)  # Check if the response is a list
@@ -263,7 +283,7 @@ class TestCityServiceAPI(unittest.TestCase):
     def test_2_create_city(self):
         payload = {"name": "New York"}
         response = self.client.post(
-            "/cities/", data=json.dumps(payload), content_type="application/json"
+            "/cities/", data=json.dumps(payload), content_type="application/json",headers=header
         )
         self.assertEqual(response.status_code, 201)  # Check if status code is 201
         data = json.loads(response.data)
@@ -276,26 +296,26 @@ class TestCityServiceAPI(unittest.TestCase):
         payload = {}  # Missing 'name'
         with self.assertRaises(KeyError):
             response = self.client.post(
-                "/cities/", data=json.dumps(payload), content_type="application/json"
+                "/cities/", data=json.dumps(payload), content_type="application/json",headers=header
             )
 
     def test_4_get_city_not_found(self):
         # Test getting a city that does not exist
         response = self.client.get(
-            "/cities/9999/"
+            "/cities/9999/",headers=header
         )  # Assuming 9999 is a non-existent ID
         self.assertEqual(response.status_code, 404)
 
     def test_6_delete_city(self):
         """ "Test for deleting a city by ID"""
         # Test getting a city that does not exist
-        response = self.client.get("/cities/")
-        response = self.client.delete("/cities/1")
+        response = self.client.get("/cities/",headers=header)
+        response = self.client.delete("/cities/1",headers=header)
         self.assertEqual(response.status_code, 204)  # Check if status code is 204
 
     def test_7_delete_all_cities(self):
-        response = self.client.delete("/cities/delete_all")
-        response = self.client.get("/cities/")
+        response = self.client.delete("/cities/delete_all",headers=header)
+        response = self.client.get("/cities/",headers=header)
         self.assertEqual(json.loads(response.data), [])
         tear_down_module()
 
@@ -308,7 +328,7 @@ class TestAirportServiceAPI(unittest.TestCase):
         cls.client = app.test_client()
 
     def test_1_get_all_airports(self):
-        response = self.client.get("/airports/")
+        response = self.client.get("/airports/",headers=header)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertIsInstance(data, list)
@@ -317,12 +337,12 @@ class TestAirportServiceAPI(unittest.TestCase):
         """ "This test tries to create an airport"""
         payload2 = {"name": "Reikjavik"}
         self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
 
-        payload = {"name": "JFK Airport", "city_id": 1}
+        payload = {"name": "JFK Airport", "city_id": '1'}
         response = self.client.post(
-            "/airports/", data=json.dumps(payload), content_type="application/json"
+            "/airports/", data=json.dumps(payload), content_type="application/json",headers=header
         )
 
         self.assertEqual(response.status_code, 201)
@@ -334,13 +354,13 @@ class TestAirportServiceAPI(unittest.TestCase):
         payload = {}
         with self.assertRaises(KeyError):
             response = self.client.post(
-                "/airports/", data=json.dumps(payload), content_type="application/json"
+                "/airports/", data=json.dumps(payload), content_type="application/json",headers=header
             )
 
     def test_4_get_airport_not_found(self):
         """ "This test tries to get airport by its id of unknown id"""
 
-        response = self.client.get("/airports/9999/")
+        response = self.client.get("/airports/9999/",headers=header)
         self.assertEqual(response.status_code, 404)
 
     def test_5_get_airport_by_id(self):
@@ -348,27 +368,28 @@ class TestAirportServiceAPI(unittest.TestCase):
 
         payload_city = {"name": "Lahti"}
         self.client.post(
-            "/cities/", data=json.dumps(payload_city), content_type="application/json"
+            "/cities/", data=json.dumps(payload_city), content_type="application/json",headers=header
         )
 
         payload = {"name": "LAX Airport", "city_id": 1}
         response = self.client.post(
-            "/airports/", data=json.dumps(payload), content_type="application/json"
+            "/airports/", data=json.dumps(payload), content_type="application/json",headers=header
         )
 
-        response = self.client.get("/airports/2")  # Adjust the ID as needed
+        response = self.client.get("/airports/2",headers=header)  # Adjust the ID as needed
+
         data = json.loads(response.data)
         self.assertEqual(data["name"], "LAX Airport")
 
     def test_6_delete_airport(self):
-        response = self.client.delete("/airports/1")  # Adjust the ID as needed
-        response = self.client.get("/airports/1")
+        response = self.client.delete("/airports/1",headers=header)  # Adjust the ID as needed
+        response = self.client.get("/airports/1",headers=header)
         self.assertEqual(response.status_code, 404)
 
     def test_7_delete_all_airports(self):
 
-        response = self.client.delete("/airports/delete_all")
-        response = self.client.get("/airports/")
+        response = self.client.delete("/airports/delete_all",headers=header)
+        response = self.client.get("/airports/",headers=header)
         self.assertEqual(json.loads(response.data), [])
         tear_down_module()
 
@@ -377,24 +398,24 @@ class TestAirportServiceAPI(unittest.TestCase):
         tear_down_module()
         payload1 = {"name": "Boston"}
         self.client.post(
-            "/cities/", data=json.dumps(payload1), content_type="application/json"
+            "/cities/", data=json.dumps(payload1), content_type="application/json",headers=header
         )
         payload2 = {"name": "Miami"}
         self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         boston = CityService.get_city_from_name("Boston")
         miami = CityService.get_city_from_name("Miami")
 
         payload3 = {"name": "BOSTON Airport", "city_id": boston}
         self.client.post(
-            "/airports/", data=json.dumps(payload3), content_type="application/json"
+            "/airports/", data=json.dumps(payload3), content_type="application/json",headers=header
         )
         payload_new = {"name": "MIAMI Airport", "city_id": miami}
         self.client.put(
-            "/airports/1", data=json.dumps(payload_new), content_type="application/json"
+            "/airports/1", data=json.dumps(payload_new), content_type="application/json",headers=header
         )
-        response = self.client.get("/airports/1")
+        response = self.client.get("/airports/1",headers=header)
         data = json.loads(response.data)
         self.assertEqual(data["name"], "MIAMI Airport")
 
@@ -404,31 +425,31 @@ class TestAirportServiceAPI(unittest.TestCase):
         # Setup for the test
         payload1 = {"name": "Boston"}
         self.client.post(
-            "/cities/", data=json.dumps(payload1), content_type="application/json"
+            "/cities/", data=json.dumps(payload1), content_type="application/json",headers=header
         )
         payload2 = {"name": "Miami"}
         self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         boston = CityService.get_city_from_name("Boston")
         miami = CityService.get_city_from_name("Miami")
 
         payload3 = {"name": "BOSTON Airport", "city_id": boston}
         self.client.post(
-            "/airports/", data=json.dumps(payload3), content_type="application/json"
+            "/airports/", data=json.dumps(payload3), content_type="application/json",headers=header
         )
         payload4 = {"name": "MIAMI Airport", "city_id": miami}
         self.client.post(
-            "/airports/", data=json.dumps(payload4), content_type="application/json"
+            "/airports/", data=json.dumps(payload4), content_type="application/json",headers=header
         )
 
         payload5 = {"name": "Triest"}
         self.client.post(
-            "/cities/", data=json.dumps(payload5), content_type="application/json"
+            "/cities/", data=json.dumps(payload5), content_type="application/json",headers=header
         )
         payload6 = {"name": "Sofia"}
         self.client.post(
-            "/cities/", data=json.dumps(payload6), content_type="application/json"
+            "/cities/", data=json.dumps(payload6), content_type="application/json",headers=header
         )
         triest = CityService.get_city_from_name("Triest")
         sofia = CityService.get_city_from_name("Sofia")
@@ -441,10 +462,13 @@ class TestAirportServiceAPI(unittest.TestCase):
             "/airports/",
             data=json.dumps(payload_updated),
             content_type="application/json",
+            headers=header
         )
 
-        response = self.client.get("/airports/")
+        response = self.client.get("/airports/",headers=header)
+
         data = json.loads(response.data)
+
         self.assertEqual(data[0]["name"], "Triest Airport")
         self.assertEqual(data[1]["name"], "SOFIA T2 Airport")
         tear_down_module()
@@ -458,7 +482,7 @@ class TestFlightServiceAPI(unittest.TestCase):
         cls.client = app.test_client()
 
     def test_1_get_all_flights(self):
-        response = self.client.get("/flights/")
+        response = self.client.get("/flights/",headers=header)
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.data)
         self.assertIsInstance(data, list)
@@ -474,11 +498,11 @@ class TestFlightServiceAPI(unittest.TestCase):
         }
         payload2 = {"name": "New York"}
         response = self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         payload2 = {"name": "Los Angeles"}
         response = self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
 
         ny = CityService.get_city_from_name("New York")
@@ -486,17 +510,18 @@ class TestFlightServiceAPI(unittest.TestCase):
 
         payload3 = {"name": "New York", "city_id": ny}
         self.client.post(
-            "/airports/", data=json.dumps(payload3), content_type="application/json"
+            "/airports/", data=json.dumps(payload3), content_type="application/json",headers=header
         )
         payload4 = {"name": "Los Angeles", "city_id": la}
         self.client.post(
-            "/airports/", data=json.dumps(payload4), content_type="application/json"
+            "/airports/", data=json.dumps(payload4), content_type="application/json",headers=header
         )
 
         response = self.client.post(
-            "/flights/", data=json.dumps(payload), content_type="application/json"
+            "/flights/", data=json.dumps(payload), content_type="application/json",headers=header
         )
         self.assertEqual(response.status_code, 201)
+
         data = json.loads(response.data)
         self.assertIn("id", data)
         self.assertEqual(data["name"], "Flight 101")
@@ -507,11 +532,11 @@ class TestFlightServiceAPI(unittest.TestCase):
         payload = {}  # Missing other required fields
         with self.assertRaises(KeyError):
             response = self.client.post(
-                "/flights/", data=json.dumps(payload), content_type="application/json"
+                "/flights/", data=json.dumps(payload), content_type="application/json",headers=header
             )
 
     def test_4_get_flight_not_found(self):
-        response = self.client.get("/flights/9999/")
+        response = self.client.get("/flights/9999/",headers=header)
         self.assertEqual(response.status_code, 404)
 
     def test_5_get_flight_by_id(self):
@@ -525,27 +550,27 @@ class TestFlightServiceAPI(unittest.TestCase):
         }
         payload2 = {"name": "Boston"}
         response = self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         payload2 = {"name": "Miami"}
         response = self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         boston = CityService.get_city_from_name("Boston")
         miami = CityService.get_city_from_name("Miami")
         payload3 = {"name": "Boston", "city_id": boston}
         self.client.post(
-            "/airports/", data=json.dumps(payload3), content_type="application/json"
+            "/airports/", data=json.dumps(payload3), content_type="application/json",headers=header
         )
         payload4 = {"name": "Miami", "city_id": miami}
         self.client.post(
-            "/airports/", data=json.dumps(payload4), content_type="application/json"
+            "/airports/", data=json.dumps(payload4), content_type="application/json",headers=header
         )
 
         response = self.client.post(
-            "/flights/", data=json.dumps(payload), content_type="application/json"
+            "/flights/", data=json.dumps(payload), content_type="application/json",headers=header
         )
-        response = self.client.get("/flights/2")
+        response = self.client.get("/flights/2",headers=header)
         data = json.loads(response.data)
         self.assertEqual(data["name"], "Flight 202")
         self.assertEqual(data["price"], 250)
@@ -557,12 +582,12 @@ class TestFlightServiceAPI(unittest.TestCase):
 
     #
     def test_6_delete_flight(self):
-        response = self.client.delete("/flights/1")  # Adjust the ID as needed
+        response = self.client.delete("/flights/1",headers=header)  # Adjust the ID as needed
         self.assertEqual(response.status_code, 200)
 
     def test_7_delete_all_flights(self):
-        response = self.client.delete("/flights/delete_all")
-        response = self.client.get("/flights/")
+        response = self.client.delete("/flights/delete_all",headers=header)
+        response = self.client.get("/flights/",headers=header)
         print(json.loads(response.data))
         self.assertEqual(json.loads(response.data), [])
         tear_down_module()
@@ -573,25 +598,25 @@ class TestFlightServiceAPI(unittest.TestCase):
         # Setup for the test
         payload1 = {"name": "Boston"}
         self.client.post(
-            "/cities/", data=json.dumps(payload1), content_type="application/json"
+            "/cities/", data=json.dumps(payload1), content_type="application/json",headers=header
         )
         payload2 = {"name": "Miami"}
         self.client.post(
-            "/cities/", data=json.dumps(payload2), content_type="application/json"
+            "/cities/", data=json.dumps(payload2), content_type="application/json",headers=header
         )
         boston = CityService.get_city_from_name("Boston")
         miami = CityService.get_city_from_name("Miami")
 
         payload3 = {"name": "BOSTON Airport", "city_id": boston}
         self.client.post(
-            "/airports/", data=json.dumps(payload3), content_type="application/json"
+            "/airports/", data=json.dumps(payload3), content_type="application/json",headers=header
         )
         payload4 = {"name": "MIAMI Airport", "city_id": miami}
         self.client.post(
-            "/airports/", data=json.dumps(payload4), content_type="application/json"
+            "/airports/", data=json.dumps(payload4), content_type="application/json",headers=header
         )
         ##
-        payload_create_city = {
+        payload_create_flight = {
             "name": "Flight 101",
             "departureAirport": "BOSTON Airport",
             "arrivalAirport": "MIAMI Airport",
@@ -602,8 +627,9 @@ class TestFlightServiceAPI(unittest.TestCase):
 
         self.client.post(
             "/flights/",
-            data=json.dumps(payload_create_city),
+            data=json.dumps(payload_create_flight),
             content_type="application/json",
+            headers=header
         )
 
         payload_search_city = {
@@ -621,8 +647,10 @@ class TestFlightServiceAPI(unittest.TestCase):
             "/flights/search",
             data=json.dumps(payload_search_city),
             content_type="application/json",
+            headers=header
         )
-        response2 = self.client.get("/flights/1")
+
+        response2 = self.client.get("/flights/1",headers=header)
         self.assertEqual(json.loads(response.data), [json.loads(response2.data)])
 
     def test_9_test_update_flights(self):
@@ -639,6 +667,7 @@ class TestFlightServiceAPI(unittest.TestCase):
             "/flights/1",
             data=json.dumps(payload_create_city),
             content_type="application/json",
+            headers=header
         )
         self.assertEqual(json.loads(response.data), "")
         tear_down_module()

@@ -4,6 +4,7 @@ import storage
 from object_service_class import ObjectService
 from database import get_db_connection
 from typing import Any, Dict, List, Optional
+from flight_planner.api_object import ApiObject
 
 class CityService(ObjectService):
     """Service to manage city objects with static methods"""
@@ -25,15 +26,18 @@ class CityService(ObjectService):
             connection.close()
 
     @staticmethod
-    def create_city(city_data: Dict[str, Any]) -> Dict[str, Any]:
-        return ObjectService.create_object(city_data, "cities")
+    def create_city(city_data: Dict[str, Any]) -> ApiObject:
+        city_to_create=ApiObject()
+        city_to_create.set_all_to_none()
+        city_to_create.create_from_dict(city_data)
+        return ObjectService.create_object(city_to_create, "cities")
 
     @staticmethod
-    def get_all_cities() -> List[Dict[str, Any]]:
+    def get_all_cities() -> List[ApiObject]:
         return ObjectService.get_all_objects("cities")
 
     @staticmethod
-    def get_city(city_id: int) -> Dict[str, Any]:
+    def get_city(city_id: int) -> ApiObject:
         return ObjectService.get_object(city_id, "cities")
 
     @staticmethod
@@ -65,29 +69,42 @@ class AirportService(ObjectService):
             connection.close()
 
     @staticmethod
-    def create_airport(airport_data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_airport(airport_data: Dict[str, Any]) -> ApiObject:
         if "city_id" in airport_data:
             try:
                 CityService.get_city(airport_data["city_id"])
             except KeyError:
                 raise KeyError("There is no city with such an ID")
 
-        return ObjectService.create_object(airport_data, "airports")
+        airport_object=ApiObject()
+        airport_object.set_all_to_none()
+        airport_object.create_from_dict(airport_data)
+        return ObjectService.create_object(airport_object, "airports")
 
     @staticmethod
-    def get_all_airports() -> List[Dict[str, Any]]:
+    def get_all_airports() -> List[ApiObject]:
         return ObjectService.get_all_objects("airports")
 
     @staticmethod
     def update_all_airports(update_data: Dict[str, Any]) -> str:
-        return ObjectService.update_all_objects(update_data, "airports")
+        list_of_airports=[]
+        for i in update_data:
+            object=ApiObject()
+            object.set_all_to_none()
+            object.create_from_dict(update_data[i])
+            list_of_airports.append(object)
+
+        return ObjectService.update_all_objects(list_of_airports, "airports")
 
     @staticmethod
     def update_airport(airport_id: int, update_data: Dict[str, Any]) -> str:
-        return ObjectService.update_object(airport_id, update_data, "airports")
+        object = ApiObject()
+        object.set_all_to_none()
+        object.create_from_dict(update_data)
+        return ObjectService.update_object(airport_id, object, "airports")
 
     @staticmethod
-    def get_airport(airport_id: int) -> Dict[str, Any]:
+    def get_airport(airport_id: int) -> ApiObject:
         return ObjectService.get_object(airport_id, "airports")
 
     @staticmethod
@@ -118,7 +135,7 @@ class FlightService(ObjectService):
         return re.sub(r"(?<!^)(?=[A-Z])", "_", string).lower()
 
     @staticmethod
-    def search_flights(search_params: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def search_flights(search_params: Dict[str, Any]) -> List[ApiObject]:
         params = []
         query = "SELECT * FROM flights WHERE 1=1"
 
@@ -154,10 +171,14 @@ class FlightService(ObjectService):
         rows = cursor.fetchall()
         connection.close()
 
-        return [
-            {key: value for key, value in dict(row).items() if value is not None}
-            for row in rows
-        ]
+        list_to_return=[]
+        for row in rows:
+            object=ApiObject()
+            object.set_all_to_none()
+            object.create_from_dict({key: value for key, value in dict(row).items() if value is not None})
+            list_to_return.append(object)
+
+        return list_to_return
 
     @staticmethod
     def calculate_arrival_time(departure_time: datetime, travel_time: int) -> str:
@@ -165,7 +186,7 @@ class FlightService(ObjectService):
         return arrival_dt.strftime("%H:%M")
 
     @staticmethod
-    def create_flight(dict: dict) -> dict:
+    def create_flight(dict:dict) -> ApiObject:
         dict_to_return = {}
         name = (
             departure_airport
@@ -233,7 +254,10 @@ class FlightService(ObjectService):
         connection.commit()
         connection.close()
 
-        return dict_to_return
+        object_to_return=ApiObject()
+        object_to_return.set_all_to_none()
+        object_to_return.create_from_dict(dict_to_return)
+        return object_to_return
 
     @staticmethod
     def to_camel_case(snake_str):
@@ -242,9 +266,7 @@ class FlightService(ObjectService):
         return components[0] + "".join(x.title() for x in components[1:])
 
     @staticmethod
-    def get_all_flights(
-        offset=0, max_count=50, sort_by="departure_time", sort_order="ASC"
-    ):
+    def get_all_flights(offset=0, max_count=50, sort_by="departure_time", sort_order="ASC") ->ApiObject:
         sort_order = (
             "ASC" if sort_order.upper() not in ["ASC", "DESC"] else sort_order.upper()
         )
@@ -272,10 +294,16 @@ class FlightService(ObjectService):
         rows = cursor.fetchall()
         connection.close()
 
-        return [
-            {key: value for key, value in dict(row).items() if value is not None}
-            for row in rows
-        ]
+
+
+        flights_to_return=[]
+        for row in rows:
+            object=ApiObject()
+            object.set_all_to_none()
+            object.create_from_dict({key: value for key, value in dict(row).items() if value is not None})
+            flights_to_return.append(object)
+
+        return flights_to_return
 
     @staticmethod
     def delete_all_flights() -> str:
@@ -283,7 +311,7 @@ class FlightService(ObjectService):
         return ""
 
     @staticmethod
-    def get_flight(flight_id: int) -> Dict[str, Any]:
+    def get_flight(flight_id: int) -> ApiObject:
         return ObjectService.get_object(flight_id, "flights")
 
     @staticmethod
@@ -293,7 +321,7 @@ class FlightService(ObjectService):
     @staticmethod
     def update_flight(id: int, dict: dict) -> str:
         try:
-            obj = ObjectService.get_object(id, "flights")
+            obj = ObjectService.get_object(id, "flights").generate_dict()
 
         except:
             raise KeyError(f"Object with ID {id} is not in the current table!")

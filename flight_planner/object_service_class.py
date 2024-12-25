@@ -2,13 +2,15 @@ from database import get_db_connection
 import csv
 import os
 import storage
-
+from flight_planner.api_object import ApiObject
 
 class ObjectService:
     """Base service class with static methods for object management"""
 
     @staticmethod
-    def create_object(dict, table):
+    def create_object(object, table):
+        dict = object.generate_dict()
+
         try:
             name = dict["name"]
         except:
@@ -42,7 +44,9 @@ class ObjectService:
         finally:
             connection.close()
 
-        return to_return
+        object.set_all_to_none()
+        object.create_from_dict(to_return)
+        return object
 
     @staticmethod
     def initialize_database(table):
@@ -137,26 +141,29 @@ class ObjectService:
         return ""
 
     @staticmethod
-    def update_object(id, dict, table):
+    def update_object(id, object, table):
+        dict = object.generate_dict()
 
         try:
-            obj = ObjectService.get_object(id, table)
+            obj = ObjectService.get_object(id, table).generate_dict()
 
         except:
             raise KeyError(f"Object with ID {id} is not in the current table!")
         ObjectService.delete_object(id, table)
         dict["id"] = obj["id"]
-        ObjectService.create_object(dict, table)
+        object.set_all_to_none()
+        object.create_from_dict(dict)
+        ObjectService.create_object(object, table)
         return ""
 
     @staticmethod
-    def update_all_objects(dict, table):
+    def update_all_objects(list_of_objects, table):
+        obj = [i.generate_dict() for i in ObjectService.get_all_objects(table)]
 
-        obj = ObjectService.get_all_objects(table)
         if obj is not []:
             ObjectService.delete_all_objects(table)
 
-        for value in dict.values():
+        for value in list_of_objects:
             try:
                 ObjectService.create_object(value, table)
             except:
@@ -182,7 +189,13 @@ class ObjectService:
         cursor.execute(f"SELECT * FROM {table}")
         rows = cursor.fetchall()
         connection.close()
-        return [dict(row) for row in rows]
+        arr_of_objects = []
+        for row in rows:
+            object = ApiObject()
+            object.set_all_to_none()
+            object.create_from_dict(dict(row))
+            arr_of_objects.append(object)
+        return arr_of_objects
 
     @staticmethod
     def get_object(id, table):
@@ -193,7 +206,11 @@ class ObjectService:
         connection.close()
         if row is None:
             raise KeyError(f"Object with ID {id} not found")
-        return {key: value for key, value in dict(row).items() if value is not None}
+        object = ApiObject()
+        object.set_all_to_none()
+        object.create_from_dict({key: value for key, value in dict(row).items() if value is not None})
+
+        return object
 
     @staticmethod
     def delete_object(id, table):
