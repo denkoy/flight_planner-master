@@ -39,8 +39,8 @@ A simple flight planning application with RESTful API endpoints for managing cit
     ```json
     {
     "name":"FR3003",
-    "arrivalAirport": 27,
-    "departureAirport": 2,
+    "arrivalAirport": "Sofia",
+    "departureAirport": "Plovdiv",
     "departureTime": "12:35",
     "travelTime": 45,
     "price": "300"
