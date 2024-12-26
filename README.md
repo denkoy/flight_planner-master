@@ -38,11 +38,12 @@ A simple flight planning application with RESTful API endpoints for managing cit
   - Request body example:
     ```json
     {
-      "arrivalAirport": 27,
-      "departureAirport": 2,
-      "departureTime": "12:35",
-      "travelTime": 45,
-      "price": "$300"
+    "name":'FR3003',
+    "arrivalAirport": 27,
+    "departureAirport": 2,
+    "departureTime": "12:35",
+    "travelTime": 45,
+    "price": "300"
     }
     ```
 - `GET /flights/` - Get all flights with optional query parameters for pagination and sorting
