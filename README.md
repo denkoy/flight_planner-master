@@ -20,6 +20,13 @@ A simple flight planning application with RESTful API endpoints for managing cit
 ### Airport Endpoints
 - `POST /airports/` - Create a new airport
 - `PUT /airports/` - Edit the whole collection of airports
+   - Request body example:
+     ```json
+      {
+      '1':{'name':'Sofia airport','city_id':'1'},
+      '2':{'name':'Pld Airport','city_id':'2'}
+      }
+    ```
 - `PUT /airports/<id>` - Edit airport by ID
 - `DELETE /airports/` - Delete all airports
 - `GET /airports/` - Get a collection of airports
