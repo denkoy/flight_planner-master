@@ -38,7 +38,7 @@ A simple flight planning application with RESTful API endpoints for managing cit
   - Request body example:
     ```json
     {
-    "name":'FR3003',
+    "name":"FR3003",
     "arrivalAirport": 27,
     "departureAirport": 2,
     "departureTime": "12:35",
